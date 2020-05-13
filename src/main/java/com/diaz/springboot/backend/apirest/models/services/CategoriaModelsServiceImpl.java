@@ -3,34 +3,40 @@ package com.diaz.springboot.backend.apirest.models.services;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.diaz.springboot.backend.apirest.models.dao.ICategoriaDao;
+import com.diaz.springboot.backend.apirest.models.entity.Categoria;
 import com.diaz.springboot.backend.apirest.models.entity.Usuario;
 
-public class CategoriaModelsServiceImpl implements IModelsService{
+@Service
+public class CategoriaModelsServiceImpl{
 
 	@Autowired
-	private IModelsService modelDao;
+	private ICategoriaDao modelDao;
 	
-	@Override
-	public List<Usuario> findAll() {
-		return modelDao.findAll();
+	@Transactional(readOnly = true)
+	public List<Categoria> findAll() {
+		return (List<Categoria>) modelDao.findAll();
 	}
 
-	@Override
-	public Usuario findById(Long id) {
-		return modelDao.findById(id);
+	@Transactional(readOnly = true)
+	public Categoria findById(Long id) {
+		return modelDao.findById(id).orElse(null);
 	}
 
-	@Override
-	public Usuario save(Usuario usuario) {
-		// TODO Auto-generated method stub
-		return modelDao.save(usuario);
+	public Categoria save(Categoria categoria) {
+		return modelDao.save(categoria);
 	}
 
-	@Override
 	public void delete(Long id) {
-		// TODO Auto-generated method stub
-		
+		modelDao.deleteById(id);
 	}
+	
+	public List<Categoria> findByUsuario(Usuario usuario) {
+		return modelDao.findByUsuario(usuario);
+	}
+	
 	
 }

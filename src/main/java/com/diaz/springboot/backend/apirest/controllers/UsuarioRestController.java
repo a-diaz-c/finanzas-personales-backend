@@ -57,7 +57,7 @@ public class UsuarioRestController {
 		usuario = usuarioService.findById(id);
 		return new ResponseEntity<Usuario>(usuario, HttpStatus.OK);
 	}
-	
+		
 	@PostMapping("/usuarios")
 	public ResponseEntity<?> create(@RequestBody Usuario usuario, BindingResult result) {
 		
@@ -82,7 +82,7 @@ public class UsuarioRestController {
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		response.put("mensaje", "El cliente se ha creado con éxito!");
+		response.put("mensaje", "El usuario se ha creado con éxito!");
 		response.put("cliente", usuarioNuevo);	
 		
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
@@ -90,20 +90,49 @@ public class UsuarioRestController {
 	}
 	
 	@PutMapping("/usuarios/{id}")
-	public Usuario update(Usuario usuario, @PathVariable Long id) {
+	public ResponseEntity<?> update(@RequestBody Usuario usuario, @PathVariable Long id, BindingResult result) {
 		
 		Usuario usuarioActual = usuarioService.findById(id);
+		Usuario usuarioActualizado = null;
 		
-		usuarioActual.setNombre(usuario.getNombre());
-		usuarioActual.setApellido(usuario.getApellido());
-		usuarioActual.setUsuario(usuario.getUsuario());
-		usuarioActual.setEmail(usuario.getEmail());
-		usuarioActual.setPassword(usuario.getPassword());		
+		Map<String, Object> response = new HashMap<>();
 		
-		return usuarioService.save(usuarioActual);
+		if(result.hasErrors()) {
+			List<String> errors = result.getFieldErrors()
+					.stream()
+					.map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
+					.collect(Collectors.toList());
+			
+			response.put("errors", errors);
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+		}
+		
+		if(usuarioActual == null) {
+			response.put("mensaje", "Error: El Usuario ID: ".concat(id.toString().concat(" no existe")));
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+		}
+		
+		try {
+			
+			usuarioActual.setNombre(usuario.getNombre());
+			usuarioActual.setApellido(usuario.getApellido());
+			usuarioActual.setUsuario(usuario.getUsuario());
+			
+			usuarioActualizado = usuarioService.save(usuarioActual);
+		}catch (DataAccessException e) {
+			response.put("mensaje", "Error al realizar el insert en la base de datos");
+			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}		
+		
+		response.put("mensaje", "El usuario se ha creado con éxito!");
+		response.put("cliente", usuarioActualizado);	
+		
+		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
+		
 	}
 	
-	@DeleteMapping("/delete/{id}")
+	@DeleteMapping("/usuarios/{id}")
 	public void delete(@PathVariable Long id) {
 		usuarioService.delete(id);
 	}

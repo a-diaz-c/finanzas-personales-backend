@@ -27,6 +27,7 @@ public class Categoria implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "id_categoria")
 	private Long idCategoria;
+	
 	private String nombre;
 	private String tipo;
 	
@@ -62,12 +63,12 @@ public class Categoria implements Serializable {
 		this.tipo = tipo;
 	}
 
-	public Usuario getId_cliente() {
+	public Usuario getId_usuario() {
 		return usuario;
 	}
 
-	public void setId_cliente(Usuario id_cliente) {
-		this.usuario = id_cliente;
+	public void setId_usuario(Usuario id_usuario) {
+		this.usuario = id_usuario;
 	}
 
 	public Date getCreateAt() {

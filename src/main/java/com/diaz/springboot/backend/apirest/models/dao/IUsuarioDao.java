@@ -4,6 +4,6 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.diaz.springboot.backend.apirest.models.entity.Usuario;
 
-public interface IModelsDao extends CrudRepository<Usuario, Long>{
+public interface IUsuarioDao extends CrudRepository<Usuario, Long>{
 
 }

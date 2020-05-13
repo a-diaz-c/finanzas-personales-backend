@@ -7,15 +7,15 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.diaz.springboot.backend.apirest.models.dao.IModelsDao;
+import com.diaz.springboot.backend.apirest.models.dao.IUsuarioDao;
 import com.diaz.springboot.backend.apirest.models.entity.Usuario;
 
-@Service()
+@Service
 @Qualifier("usuarioModelsServiceImpl")
 public class UsuarioModelsServiceImpl implements IModelsService{
 
 	@Autowired
-	private IModelsDao modelDao;
+	private IUsuarioDao modelDao;
 
 	@Override
 	@Transactional(readOnly = true)
