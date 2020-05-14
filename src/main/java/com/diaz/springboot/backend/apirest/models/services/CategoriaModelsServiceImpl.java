@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.diaz.springboot.backend.apirest.models.dao.ICategoriaDao;
 import com.diaz.springboot.backend.apirest.models.entity.Categoria;
-import com.diaz.springboot.backend.apirest.models.entity.Usuario;
 
 @Service
 public class CategoriaModelsServiceImpl{
@@ -33,10 +32,7 @@ public class CategoriaModelsServiceImpl{
 	public void delete(Long id) {
 		modelDao.deleteById(id);
 	}
-	
-	public List<Categoria> findByUsuario(Usuario usuario) {
-		return modelDao.findByUsuario(usuario);
-	}
+
 	
 	
 }

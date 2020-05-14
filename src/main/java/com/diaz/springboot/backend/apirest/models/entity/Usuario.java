@@ -1,14 +1,18 @@
 package com.diaz.springboot.backend.apirest.models.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
@@ -42,8 +46,13 @@ public class Usuario implements Serializable{
 	@Temporal(TemporalType.DATE)
 	private Date createAt;
 	
-	@OneToMany(mappedBy="usuario")  
-	private List<Categoria> categorias;
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@JoinColumn(name = "fk_id_usuario")
+	private List<Categoria> categoria;
+	
+	public Usuario() {
+		this.categoria = new ArrayList<Categoria>();
+	}
 	
 	@PrePersist
 	public void prePersist() {
@@ -104,6 +113,18 @@ public class Usuario implements Serializable{
 
 	public void setCreateAt(Date createAt) {
 		this.createAt = createAt;
+	}
+
+	public List<Categoria> getCategorias() {
+		return categoria;
+	}
+
+	public void setCategoria(List<Categoria> categoria) {
+		this.categoria = categoria;
+	}
+	
+	public void addCategoria(Categoria categoria) {
+		this.categoria.add(categoria);
 	}
 
 }

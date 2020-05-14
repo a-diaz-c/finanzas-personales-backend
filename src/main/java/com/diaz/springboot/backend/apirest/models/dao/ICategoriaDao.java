@@ -12,7 +12,7 @@ import com.diaz.springboot.backend.apirest.models.entity.Usuario;
 
 public interface ICategoriaDao extends CrudRepository<Categoria, Long >{
 	
-	@Query("select u from Categoria u where u.usuario = :id_usuario")
-	public List<Categoria> findByUsuario(@Param("id_usuario") Usuario usuario);
+	/*@Query("select u from Categoria u where u.usuario = :id_usuario")
+	public List<Categoria> findByUsuario(@Param("id_usuario") Usuario usuario);*/
 
 }

@@ -32,8 +32,24 @@ public class UsuarioRestController {
 	private IModelsService usuarioService;
 	
 	@GetMapping("/usuarios")
-	public List<Usuario> index(){
-		return usuarioService.findAll();
+	public ResponseEntity<?> index(){
+		Map<String, Object> response = new HashMap<>();
+		List<Usuario> usuarios = null;
+		
+		try {
+			usuarios = usuarioService.findAll();
+		} catch (DataAccessException e) {
+			response.put("mensaje", "Error al realizar el insert en la base de datos");
+			response.put("error", e.getMessage().concat(" :").concat(e.getMostSpecificCause().getMessage()));
+			
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+		response.put("Usuarios", usuarios);
+		response.put("mensaje", "Usuarios consultadas");
+		
+		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+		
 	}
 	
 	@GetMapping("/usuarios/{id}")
@@ -109,7 +125,7 @@ public class UsuarioRestController {
 		
 		if(usuarioActual == null) {
 			response.put("mensaje", "Error: El Usuario ID: ".concat(id.toString().concat(" no existe")));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
 		
 		try {
@@ -133,7 +149,19 @@ public class UsuarioRestController {
 	}
 	
 	@DeleteMapping("/usuarios/{id}")
-	public void delete(@PathVariable Long id) {
-		usuarioService.delete(id);
+	public ResponseEntity<?> delete(@PathVariable Long id) {
+		
+		Map<String, Object> response = new HashMap<>();
+		
+		try {
+			usuarioService.delete(id);
+		}catch (DataAccessException e) {
+			response.put("mensaje", "Error al eliminar el cliente de la base de datos");
+			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		response.put("mensaje","El usuario se ha eliminada");
+		
+		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
 }
