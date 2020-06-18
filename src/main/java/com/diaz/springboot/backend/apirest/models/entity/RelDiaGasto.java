@@ -3,7 +3,9 @@ package com.diaz.springboot.backend.apirest.models.entity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -11,10 +13,12 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-@Entity
-@Table(name = "dias_sub_categorias")
-public class DiaSubCategoria implements Serializable{
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+@Entity
+@Table(name = "rel_dia_gasto")
+public class RelDiaGasto implements Serializable{
+	
 	/**
 	 * 
 	 */
@@ -22,16 +26,21 @@ public class DiaSubCategoria implements Serializable{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "id_cantidad")
 	private Long id;
 	
-	@JoinColumn(name = "fk_id_sub_categoria", nullable = false)
-	@ManyToOne
-	private SubCategoria subCategoria;
 	
-	@JoinColumn(name = "fk_id_dia", nullable = false)
-	@ManyToOne
-	private Dia dia;
 	
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "fk_id_dia")
+	private Dia id_dia;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "fk_id_gasto")
+	private Gasto id_gasto;
+	
+	@Column(name = "cantidad")
 	private BigDecimal cantidad;
 
 	public Long getId() {
@@ -42,20 +51,21 @@ public class DiaSubCategoria implements Serializable{
 		this.id = id;
 	}
 
-	public SubCategoria getIdSubCategoria() {
-		return subCategoria;
+	@JsonIgnore
+	public Dia getDia() {
+		return id_dia;
 	}
 
-	public void setIdSubCategoria(SubCategoria subCategoria) {
-		this.subCategoria = subCategoria;
+	public void setDia(Dia dia) {
+		this.id_dia = dia;
 	}
 
-	public Dia getIdDia() {
-		return dia;
+	public Gasto getGasto() {
+		return id_gasto;
 	}
 
-	public void setIdDia(Dia dia) {
-		this.dia = dia;
+	public void setGasto(Gasto gasto) {
+		this.id_gasto = gasto;
 	}
 
 	public BigDecimal getCantidad() {
@@ -67,5 +77,7 @@ public class DiaSubCategoria implements Serializable{
 	}
 	
 	
-
+	
+	
+	
 }

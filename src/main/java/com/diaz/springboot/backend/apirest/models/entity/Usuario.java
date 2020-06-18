@@ -12,7 +12,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
@@ -21,11 +20,16 @@ import javax.persistence.TemporalType;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 
-@CrossOrigin(origins = {"*"})
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+@JsonInclude(Include.NON_EMPTY)
 @Entity
 @Table(name = "usuarios")
 public class Usuario implements Serializable{
 
+	
 	/**
 	 * 
 	 */
@@ -40,6 +44,7 @@ public class Usuario implements Serializable{
 	private String apellido;
 	private String usuario;
 	private String email;
+	@JsonIgnore
 	private String password;
 
 	@Column(name = "create_at")
@@ -47,11 +52,14 @@ public class Usuario implements Serializable{
 	private Date createAt;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	@JoinColumn(name = "fk_id_usuario")
 	private List<Categoria> categoria;
+	
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	private List<Dia> dias;
 	
 	public Usuario() {
 		this.categoria = new ArrayList<Categoria>();
+		this.dias = new ArrayList<Dia>();
 	}
 	
 	@PrePersist
@@ -125,6 +133,18 @@ public class Usuario implements Serializable{
 	
 	public void addCategoria(Categoria categoria) {
 		this.categoria.add(categoria);
+	}
+
+	public List<Dia> getDias() {
+		return dias;
+	}
+
+	public void setDias(List<Dia> dias) {
+		this.dias = dias;
+	}
+	
+	public void addDias(Dia dia) {
+		this.dias.add(dia);
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.diaz.springboot.backend.apirest.models.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -18,11 +19,9 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 @Entity
-@Table(name = "categorias")
-public class Categoria implements Serializable {
+@Table(name = "gastos")
+public class Gasto implements Serializable {
 
 	/**
 	 * 
@@ -31,32 +30,44 @@ public class Categoria implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "id_categoria")
-	private Long idCategoria;
+	@Column(name = "id_gasto")
+	private Long idGasto;
 	
 	private String nombre;
 	
-	
-	@JsonIgnore
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "fk_id_usuario")
-	private Usuario usuario;
+	@JoinColumn(name = "fk_id_categoria")
+	private Categoria categoria;
 	
 	
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	//@JoinColumn(name = "fk_id_categoria")
-	private List<Gasto> gastos;
-	
+	//@ManyToMany(mappedBy = "gastos")
+	@OneToMany(fetch = FetchType.LAZY)
+	private List<RelDiaGasto> cantidades;
+
 	@Column(name = "create_at")
 	@Temporal(TemporalType.DATE)
 	private Date createAt;
+	
+	public Gasto() {
+		this.cantidades = new ArrayList<>();
+	}
+	
 
-	public Long getIdCategoria() {
-		return idCategoria;
+	public Long getIdGasto() {
+		return idGasto;
 	}
 
-	public void setIdCategoria(Long idCategoria) {
-		this.idCategoria = idCategoria;
+	public void setIdGasto(Long idGasto) {
+		this.idGasto = idGasto;
+	}
+
+	
+	public List<RelDiaGasto> getCantidades() {
+		return cantidades;
+	}
+
+	public void setCantidades(List<RelDiaGasto> relDiaGasto) {
+		this.cantidades = relDiaGasto;
 	}
 
 	public String getNombre() {
@@ -74,25 +85,19 @@ public class Categoria implements Serializable {
 	public void setCreateAt(Date createAt) {
 		this.createAt = createAt;
 	}
-
-	public List<Gasto> getSubCategoria() {
-		return gastos;
-	}
-
-	public void setSubCategoria(List<Gasto> subCategoria) {
-		this.gastos = subCategoria;
-	}
 	
-	public void addSubCategoria(Gasto subCategoria) {
-		this.gastos.add(subCategoria);
+	public void addCantidades(RelDiaGasto relDiaGasto) {
+		this.cantidades.add(relDiaGasto);
 	}
 
-	public Usuario getUsuario() {
-		return usuario;
+
+	public Categoria getCategoria() {
+		return categoria;
 	}
 
-	public void setUsuario(Usuario usuario) {
-		this.usuario = usuario;
+
+	public void setCategoria(Categoria categoria) {
+		this.categoria = categoria;
 	}
 	
 	

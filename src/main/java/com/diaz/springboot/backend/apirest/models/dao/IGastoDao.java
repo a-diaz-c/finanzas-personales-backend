@@ -7,12 +7,11 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.diaz.springboot.backend.apirest.models.entity.Categoria;
-import com.diaz.springboot.backend.apirest.models.entity.Usuario;
+import com.diaz.springboot.backend.apirest.models.entity.Gasto;
 
+public interface IGastoDao extends CrudRepository<Gasto, Long> {
 
-public interface ICategoriaDao extends CrudRepository<Categoria, Long >{
+	@Query("select u from Gasto u where u.categoria = :id_categoria")
+	public List<Gasto> findByCategoria(@Param("id_categoria") Categoria categoria);
 	
-	@Query("select u from Categoria u where u.usuario = :id_usuario")
-	public List<Categoria> findByUsuario(@Param("id_usuario") Usuario usuario);
-
 }
