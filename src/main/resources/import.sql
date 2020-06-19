@@ -1,5 +1,5 @@
-INSERT INTO usuarios (id_usuario, nombre, apellido, usuario, email, password, create_at) VALUES(1, 'Alberto', 'Díaz', 'diaz1', 'diaz@gmail.com', '', '2019-08-28');
-INSERT INTO usuarios (id_usuario, nombre, apellido, usuario, email, password, create_at) VALUES(2, 'Melchor', 'Díaz', 'MelDiaz', 'mel.diaz@gmail.com', '', '2019-08-28');
+INSERT INTO usuarios (id_usuario, nombre, apellido, usuario, email, password, create_at) VALUES(1, 'Alberto', 'Díaz', 'diaz1', 'diaz@gmail.com', '$2a$10$gWhxq5uVvGhyZnSUy8QskOQdx35o2s.uDAb3pNLpuYUUH3rhoMjJa', '2019-08-28');
+INSERT INTO usuarios (id_usuario, nombre, apellido, usuario, email, password, create_at) VALUES(2, 'Melchor', 'Díaz', 'MelDiaz', 'mel.diaz@gmail.com', '$2a$10$32SKxEVthPcEJ3uWV1GecO4Jk8Dhzh.L4LgrEKjU5J2SuAW0mJ9PK', '2019-08-28');
 
 INSERT INTO categorias (id_categoria, nombre, fk_id_usuario, create_at) VALUES(1, 'Alimentos',1 , '2020-05-12')
 INSERT INTO categorias (id_categoria, nombre, fk_id_usuario, create_at) VALUES(2, 'Vivienda',1 , '2020-05-12')

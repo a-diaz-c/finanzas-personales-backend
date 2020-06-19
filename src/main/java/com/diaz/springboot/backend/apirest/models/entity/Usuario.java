@@ -18,8 +18,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -40,9 +38,13 @@ public class Usuario implements Serializable{
 	@Column(name = "id_usuario")
 	private Long idUsuario;
 
+	@Column(nullable = false)
 	private String nombre;
+	@Column(nullable = false)
 	private String apellido;
+	@Column(nullable = false, unique = true)
 	private String usuario;
+	@Column(nullable = false, unique = true)
 	private String email;
 	@JsonIgnore
 	private String password;

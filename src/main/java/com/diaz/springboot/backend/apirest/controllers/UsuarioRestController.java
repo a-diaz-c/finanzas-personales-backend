@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.diaz.springboot.backend.apirest.models.entity.Usuario;
 import com.diaz.springboot.backend.apirest.models.services.IModelsService;
+import com.diaz.springboot.backend.apirest.models.services.UsuarioModelsServiceImpl;
 
 @CrossOrigin(origins = {"*"})
 @RestController
@@ -31,7 +32,7 @@ public class UsuarioRestController {
 
 	@Autowired
 	@Qualifier("usuarioModelsServiceImpl")
-	private IModelsService usuarioService;
+	private UsuarioModelsServiceImpl usuarioService;
 	
 	@GetMapping("/usuarios")
 	public ResponseEntity<?> index(){
@@ -178,5 +179,10 @@ public class UsuarioRestController {
 		response.put("mensaje","El usuario se ha eliminada");
 		
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+	}
+	
+	@PostMapping("/login")
+	public Usuario login() {
+		return usuarioService.buscasEmail("diaz@gmail.com");
 	}
 }

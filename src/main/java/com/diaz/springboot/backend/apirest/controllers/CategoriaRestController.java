@@ -45,7 +45,7 @@ public class CategoriaRestController {
 		Map<String, Object> response = new HashMap<>();		
 		List<Categoria> categorias = null;
 		Usuario usuario = null;
-		
+		log.info("Ruta Categorias del usuario");
 		try {
 			usuario = usuarioService.findById(idUsuario);
 			
