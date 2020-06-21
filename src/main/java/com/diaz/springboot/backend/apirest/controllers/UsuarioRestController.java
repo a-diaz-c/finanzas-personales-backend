@@ -5,11 +5,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,10 +31,15 @@ import com.diaz.springboot.backend.apirest.models.services.UsuarioModelsServiceI
 @RestController
 @RequestMapping("/api")
 public class UsuarioRestController {
+	
+	private final Logger log = org.slf4j.LoggerFactory.getLogger(getClass());
 
 	@Autowired
 	@Qualifier("usuarioModelsServiceImpl")
 	private UsuarioModelsServiceImpl usuarioService;
+	
+	@Autowired
+	private BCryptPasswordEncoder passwordEncoder;
 	
 	@GetMapping("/usuarios")
 	public ResponseEntity<?> index(){
@@ -100,6 +107,8 @@ public class UsuarioRestController {
 		}
 		
 		try {
+			String passwordBcryp =  passwordEncoder.encode(usuario.getPassword());
+			usuario.setPassword(passwordBcryp);
 			usuarioNuevo = usuarioService.save(usuario);
 		}catch (DataAccessException e) {
 			response.put("respuesta", false);

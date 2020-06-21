@@ -21,6 +21,8 @@ import javax.persistence.TemporalType;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 @JsonInclude(Include.NON_EMPTY)
 @Entity
@@ -46,7 +48,8 @@ public class Usuario implements Serializable{
 	private String usuario;
 	@Column(nullable = false, unique = true)
 	private String email;
-	@JsonIgnore
+	@JsonProperty(access = Access.WRITE_ONLY)
+	@Column(nullable = false)
 	private String password;
 
 	@Column(name = "create_at")
