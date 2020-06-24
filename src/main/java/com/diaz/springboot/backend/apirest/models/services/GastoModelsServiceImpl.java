@@ -35,6 +35,10 @@ public class GastoModelsServiceImpl {
 		return modelDao.findByCategoria(categoria);
 	}
 	
+	public void deleteByCategoria(Categoria categoria) {
+		modelDao.deleteByCategoria(categoria);
+	}
+	
 	
 
 }

@@ -11,7 +11,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,8 +26,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.diaz.springboot.backend.apirest.models.entity.Categoria;
 import com.diaz.springboot.backend.apirest.models.entity.Usuario;
+import com.diaz.springboot.backend.apirest.models.services.CategoriaModelsServiceImpl;
 import com.diaz.springboot.backend.apirest.models.services.IModelsService;
+import com.diaz.springboot.backend.apirest.models.services.OperacionesUsuarioService;
 import com.diaz.springboot.backend.apirest.models.services.UsuarioModelsServiceImpl;
 
 @CrossOrigin(origins = {"*"})
@@ -39,9 +45,15 @@ public class UsuarioRestController {
 	private UsuarioModelsServiceImpl usuarioService;
 	
 	@Autowired
+	private CategoriaModelsServiceImpl categoriaService;
+	
+	@Autowired
+	private OperacionesUsuarioService operacionesService;
+	
+	@Autowired
 	private BCryptPasswordEncoder passwordEncoder;
 	
-	@GetMapping("/usuarios")
+	/*@GetMapping("/usuarios")
 	public ResponseEntity<?> index(){
 		Map<String, Object> response = new HashMap<>();
 		List<Usuario> usuarios = null;
@@ -61,15 +73,15 @@ public class UsuarioRestController {
 		response.put("mensaje", "Usuarios consultadas");
 		
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);		
-	}
+	}*/
 	
-	@GetMapping("/usuarios/{id}")
-	public ResponseEntity<?> show(@PathVariable Long id) {
+	@GetMapping("/usuarios")
+	public ResponseEntity<?> show(Authentication authentication) {
 		Usuario usuario = null;
 		Map<String, Object> response = new HashMap<>();
 		
 		try {
-			usuario = usuarioService.findById(id);			
+			usuario = usuarioService.buscasEmail(authentication.getName());			
 		}catch (DataAccessException e) {
 			response.put("respuesta", false);
 			response.put("mensaje", "Error al realizar la consulta en la base de datos");
@@ -79,11 +91,10 @@ public class UsuarioRestController {
 		
 		if(usuario == null) {
 			response.put("respuesta", false);
-			response.put("mensaje", "El usuario ID: ".concat(id.toString().concat(" no existe en la base de datos")));
+			response.put("mensaje", "El usuario ID: ".concat(authentication.getName().concat(" no existe en la base de datos")));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
 		
-		usuario = usuarioService.findById(id);
 		response.put("respuesta", true);
 		response.put("usuario", usuario);
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
@@ -107,8 +118,8 @@ public class UsuarioRestController {
 		}
 		
 		try {
-			String passwordBcryp =  passwordEncoder.encode(usuario.getPassword());
-			usuario.setPassword(passwordBcryp);
+			/*String passwordBcryp =  passwordEncoder.encode(usuario.getPassword());
+			usuario.setPassword(passwordBcryp);*/
 			usuarioNuevo = usuarioService.save(usuario);
 		}catch (DataAccessException e) {
 			response.put("respuesta", false);
@@ -124,10 +135,10 @@ public class UsuarioRestController {
 		
 	}
 	
-	@PutMapping("/usuarios/{id}")
-	public ResponseEntity<?> update(@RequestBody Usuario usuario, @PathVariable Long id, BindingResult result) {
+	@PutMapping("/usuarios")
+	public ResponseEntity<?> update(@RequestBody Usuario usuario,Authentication authentication, BindingResult result) {
 		
-		Usuario usuarioActual = usuarioService.findById(id);
+		Usuario usuarioActual = usuarioService.buscasEmail(authentication.getName());
 		Usuario usuarioActualizado = null;
 		
 		Map<String, Object> response = new HashMap<>();
@@ -145,7 +156,7 @@ public class UsuarioRestController {
 		
 		if(usuarioActual == null) {
 			response.put("respuesta", false);
-			response.put("mensaje", "Error: El Usuario ID: ".concat(id.toString().concat(" no existe")));
+			response.put("mensaje", "Error: El Usuario ID: ".concat(authentication.getName().concat(" no existe")));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
 		
@@ -171,13 +182,12 @@ public class UsuarioRestController {
 		
 	}
 	
-	@DeleteMapping("/usuarios/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
-		
+	@DeleteMapping("/usuarios")
+	public ResponseEntity<?> delete(Authentication authentication) {		
 		Map<String, Object> response = new HashMap<>();
 		
 		try {
-			usuarioService.delete(id);
+			operacionesService.eliminarDatosUsuario(authentication.getName());
 		}catch (DataAccessException e) {
 			response.put("respuesta", false);
 			response.put("mensaje", "Error al eliminar el cliente de la base de datos");
@@ -190,8 +200,5 @@ public class UsuarioRestController {
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
 	
-	@PostMapping("/login")
-	public Usuario login() {
-		return usuarioService.buscasEmail("diaz@gmail.com");
-	}
+
 }

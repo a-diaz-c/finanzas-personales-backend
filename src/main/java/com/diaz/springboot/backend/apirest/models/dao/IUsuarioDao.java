@@ -14,4 +14,7 @@ public interface IUsuarioDao extends CrudRepository<Usuario, Long>{
 	@Query("SELECT u FROM Usuario u WHERE u.email = ?1")
 	public Usuario findByEmail(String email);
 	
+	@Query("DELETE FROM Usuario u WHERE u.email = ?1")
+	public void delteByEmail(String email);
+	
 }

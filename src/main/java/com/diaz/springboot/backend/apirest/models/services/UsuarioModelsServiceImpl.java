@@ -65,7 +65,12 @@ public class UsuarioModelsServiceImpl implements UserDetailsService{
 		return new User(usuario.getEmail(), usuario.getPassword(), true, true, true, true, authorities);
 	}
 	
+	@Transactional(readOnly = true)
 	public Usuario buscasEmail(String email) {
 		return modelDao.findByEmail(email);
+	}
+	
+	public void deleteByEmail(String email) {
+		modelDao.delteByEmail(email);
 	}
 }

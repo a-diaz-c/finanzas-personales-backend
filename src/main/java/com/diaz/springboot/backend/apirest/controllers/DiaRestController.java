@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -47,19 +48,19 @@ public class DiaRestController {
 	@Autowired
 	private UsuarioModelsServiceImpl usuarioService;
 	
-	@GetMapping("/dias/{idUsuario}")
-	public ResponseEntity<?> index(@PathVariable (value = "idUsuario") Long idUsuario){
+	@GetMapping("/dias")
+	public ResponseEntity<?> index(Authentication authentication){
 		
 		Map<String, Object> response = new HashMap<>();	
 		Usuario usuario = null;
 		List<Dia> dias = null;
 		
 		try {
-			usuario = usuarioService.findById(idUsuario);
+			usuario = usuarioService.buscasEmail(authentication.getName());
 			
 			if(usuario == null) {
 				response.put("respuesta", false);
-				response.put("mensaje", "El usuario ID: ".concat(idUsuario.toString().concat(" no existe en la base de datos")));
+				response.put("mensaje", "El usuario ID: ".concat(authentication.getName().concat(" no existe en la base de datos")));
 				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 			}
 			
@@ -109,9 +110,8 @@ public class DiaRestController {
 	}
 
 	
-	@PostMapping("/dias/{idUsuario}")
-	public ResponseEntity<?> create(
-			@PathVariable (value = "idUsuario") long idUsuario, @RequestBody Dia dia, BindingResult result){
+	@PostMapping("/dias")
+	public ResponseEntity<?> create(Authentication authentication, @RequestBody Dia dia, BindingResult result){
 		
 		Dia nuevoDia = null;
 		Usuario usuario = null;
@@ -135,7 +135,7 @@ public class DiaRestController {
 		}
 		
 		try {
-			usuario = usuarioService.findById(idUsuario);
+			usuario = usuarioService.buscasEmail(authentication.getName());
 			dia.setUsuario(usuario);
 			nuevoDia = diaService.save(dia);
 			
@@ -166,8 +166,8 @@ public class DiaRestController {
 		
 	}
 	
-	@PutMapping("/dias/{idUsuario}/{idDia}")
-	public ResponseEntity<?> update(@RequestBody Dia dia, @PathVariable (value = "idUsuario") Long idUsuario, 
+	@PutMapping("/dias/{idDia}")
+	public ResponseEntity<?> update(@RequestBody Dia dia, Authentication authentication,
 			 						@PathVariable (value = "idDia") Long idDia, BindingResult result){
 		
 		Dia diaActual = null;

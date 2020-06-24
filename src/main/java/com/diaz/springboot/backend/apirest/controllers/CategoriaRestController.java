@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.diaz.springboot.backend.apirest.models.entity.Categoria;
 import com.diaz.springboot.backend.apirest.models.entity.Usuario;
 import com.diaz.springboot.backend.apirest.models.services.CategoriaModelsServiceImpl;
+import com.diaz.springboot.backend.apirest.models.services.GastoModelsServiceImpl;
 import com.diaz.springboot.backend.apirest.models.services.UsuarioModelsServiceImpl;
 
 @CrossOrigin(origins = {"*"})
@@ -39,15 +41,24 @@ public class CategoriaRestController {
 	@Autowired
 	private UsuarioModelsServiceImpl usuarioService;
 	
-	@GetMapping("/categorias/{idUsuario}")
-	public ResponseEntity<?> index(@PathVariable (value = "idUsuario") Long idUsuario){
+	@Autowired
+	private GastoModelsServiceImpl gastoService;
+	
+	@GetMapping("/categorias")
+	public ResponseEntity<?> index(Authentication authentication){
 		
 		Map<String, Object> response = new HashMap<>();		
 		List<Categoria> categorias = null;
 		Usuario usuario = null;
 		log.info("Ruta Categorias del usuario");
 		try {
-			usuario = usuarioService.findById(idUsuario);
+			usuario = usuarioService.buscasEmail(authentication.getName());
+			log.info(authentication.getName());
+			if(usuario == null) {
+				response.put("respuesta", false);
+				response.put("mensaje", "El usuario ".concat(authentication.getName().concat(" no existe en la base de datos")));
+				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+			}
 			
 			categorias = categoriaService.findByUsuario(usuario);
 		}catch (DataAccessException e) {
@@ -55,14 +66,7 @@ public class CategoriaRestController {
 			response.put("mensaje", "Error al realizar la consulta en la base de datos");
 			response.put("error", e.getMessage().concat(" :").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-
-		if(usuario == null) {
-			response.put("respuesta", false);
-			response.put("mensaje", "El usuario ID: ".concat(idUsuario.toString().concat(" no existe en la base de datos")));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
-		}
-		
+		}		
 		
 		response.put("respuesta",true);
 		response.put("mensaje", "Categorias consultadas");
@@ -71,8 +75,8 @@ public class CategoriaRestController {
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
 	
-	@PostMapping("/categorias/{idUsuario}")
-	public ResponseEntity<?> create(@PathVariable (value = "idUsuario") long idUsuario, @RequestBody Categoria categoria, BindingResult result){
+	@PostMapping("/categorias")
+	public ResponseEntity<?> create(@RequestBody Categoria categoria, BindingResult result, Authentication authentication){
 		
 		Categoria nuevaCategoria = null;
 		Map<String, Object> response = new HashMap<>();
@@ -90,7 +94,14 @@ public class CategoriaRestController {
 		}
 		
 		try {
-			usuario = usuarioService.findById(idUsuario);
+			usuario = usuarioService.buscasEmail(authentication.getName());
+			
+			if(usuario == null) {
+				response.put("respuesta", false);
+				response.put("mensaje", "El usuario ".concat(authentication.getName().concat(" no existe en la base de datos")));
+				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+			}
+			
 			categoria.setUsuario(usuario);
 			nuevaCategoria = categoriaService.save(categoria);
 		}catch (DataAccessException e) {
@@ -155,11 +166,13 @@ public class CategoriaRestController {
 	
 	@DeleteMapping("/categorias/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
-		
+		Categoria categoria;
 		Map<String, Object> response = new HashMap<>();
 		
 		try {
-			categoriaService.delete(id);
+			categoria = categoriaService.findById(id);
+			gastoService.deleteByCategoria(categoria);
+			categoriaService.delete(categoria.getIdCategoria());
 		} catch (DataAccessException e) {
 			response.put("mensaje", "Error al eliminar la categoría de la base de datos");
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
