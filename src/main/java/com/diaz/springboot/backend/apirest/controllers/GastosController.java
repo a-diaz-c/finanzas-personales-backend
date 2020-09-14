@@ -62,7 +62,7 @@ public class GastosController {
 		
 		response.put("respuesta",true);
 		response.put("mensaje", "Categorias consultadas");
-		response.put("categorias", gastos);
+		response.put("gastos", gastos);
 		
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
@@ -71,7 +71,7 @@ public class GastosController {
 	private ResponseEntity<?> create(@PathVariable(value = "idCategoria") Long idCategoria, 
 									 @RequestBody Gasto gasto, BindingResult result){
 		
-		Gasto nuevaCategoria = null;
+		Gasto nuevoGasto = null;
 		Map<String, Object> response = new HashMap<>();
 		
 		if(result.hasErrors()) {
@@ -95,7 +95,7 @@ public class GastosController {
 			}
 			
 			gasto.setCategoria(categoria);
-			nuevaCategoria = gastoService.save(gasto);
+			nuevoGasto = gastoService.save(gasto);
 		} catch (DataAccessException e) {
 			response.put("respuesta",false);
 			response.put("mensaje", "Error al realizar el insert en la base de datos");
@@ -105,7 +105,7 @@ public class GastosController {
 		
 		response.put("respuesta",true);
 		response.put("mensaje", "El gasto se ha creado con éxito!");
-		response.put("categoria", nuevaCategoria);	
+		response.put("categoria", nuevoGasto);	
 		
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}

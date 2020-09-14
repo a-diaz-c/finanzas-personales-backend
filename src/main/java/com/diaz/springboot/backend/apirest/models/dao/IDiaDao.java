@@ -24,8 +24,8 @@ public interface IDiaDao extends CrudRepository<Dia, Long>{
 	@Query("select u from Dia u where u.usuario = :id_usuario")
 	List<Dia> findByUsuario(@Param("id_usuario") Usuario usuario);
 	
-	@Query("select u from Dia u where u.fecha = :fecha")
-	Dia findByFecha(@Param("fecha") Date date);
+	@Query("select u from Dia u where u.fecha = :fecha and u.usuario = :usuario")
+	Dia findByFecha(@Param("fecha") Date date, @Param("usuario") Usuario usuario);
 	
 	@Transactional
 	@Modifying

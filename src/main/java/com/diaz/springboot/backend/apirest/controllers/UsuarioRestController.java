@@ -13,23 +13,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.diaz.springboot.backend.apirest.models.entity.Categoria;
 import com.diaz.springboot.backend.apirest.models.entity.Usuario;
 import com.diaz.springboot.backend.apirest.models.services.CategoriaModelsServiceImpl;
-import com.diaz.springboot.backend.apirest.models.services.IModelsService;
 import com.diaz.springboot.backend.apirest.models.services.OperacionesUsuarioService;
 import com.diaz.springboot.backend.apirest.models.services.UsuarioModelsServiceImpl;
 
@@ -81,7 +76,7 @@ public class UsuarioRestController {
 		Map<String, Object> response = new HashMap<>();
 		
 		try {
-			usuario = usuarioService.buscasEmail(authentication.getName());			
+			usuario = usuarioService.buscasEmail(authentication.getName());	
 		}catch (DataAccessException e) {
 			response.put("respuesta", false);
 			response.put("mensaje", "Error al realizar la consulta en la base de datos");
@@ -118,8 +113,17 @@ public class UsuarioRestController {
 		}
 		
 		try {
-			/*String passwordBcryp =  passwordEncoder.encode(usuario.getPassword());
-			usuario.setPassword(passwordBcryp);*/
+			
+			usuarioNuevo = usuarioService.buscasEmail(usuario.getEmail());
+			
+			if(usuarioNuevo != null) {
+				response.put("respuesta", false);
+				response.put("mensaje", "El email ya se encuentra registrado");
+				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+			}
+			
+			String passwordBcryp =  passwordEncoder.encode(usuario.getPassword());
+			usuario.setPassword(passwordBcryp);
 			usuarioNuevo = usuarioService.save(usuario);
 		}catch (DataAccessException e) {
 			response.put("respuesta", false);
@@ -164,7 +168,6 @@ public class UsuarioRestController {
 			
 			usuarioActual.setNombre(usuario.getNombre());
 			usuarioActual.setApellido(usuario.getApellido());
-			usuarioActual.setUsuario(usuario.getUsuario());
 			
 			usuarioActualizado = usuarioService.save(usuarioActual);
 		}catch (DataAccessException e) {

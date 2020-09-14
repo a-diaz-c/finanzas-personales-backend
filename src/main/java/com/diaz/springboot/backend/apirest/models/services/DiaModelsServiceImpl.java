@@ -1,5 +1,6 @@
 package com.diaz.springboot.backend.apirest.models.services;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,6 +60,10 @@ public class DiaModelsServiceImpl {
 	
 	public void deleteCantidades(Dia dia) {
 		modelDao.deleteCantidades(dia);
+	}
+	
+	public Dia findByFecha(Date date, Usuario usuario) {
+		return modelDao.findByFecha(date, usuario);
 	}
 	
 }

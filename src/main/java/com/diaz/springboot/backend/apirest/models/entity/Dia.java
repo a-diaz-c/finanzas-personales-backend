@@ -54,10 +54,10 @@ public class Dia implements Serializable{
 			   joinColumns = @JoinColumn(name = "FK_dia", nullable = false),
 			   inverseJoinColumns = @JoinColumn(name="FK_gasto", nullable = false))*/
 	@OneToMany(fetch = FetchType.LAZY)
-	private List<RelDiaGasto> cantidades;
+	private List<RelDiaGasto> movimientos;
 	
 	public Dia() {
-		this.cantidades = new ArrayList<>();
+		this.movimientos = new ArrayList<>();
 	}
 	
 	public Long getIdDia() {
@@ -93,15 +93,15 @@ public class Dia implements Serializable{
 	}
 
 	public List<RelDiaGasto> getCantidades() {
-		return cantidades;
+		return movimientos;
 	}
 
 	public void setCantidades(List<RelDiaGasto> relDiaGasto) {
-		this.cantidades = relDiaGasto;
+		this.movimientos = relDiaGasto;
 	}
 	
 	public void addCantidades(RelDiaGasto relDiaGasto) {
-		this.cantidades.add(relDiaGasto);
+		this.movimientos.add(relDiaGasto);
 	}
 
 	public Usuario getUsuario() {

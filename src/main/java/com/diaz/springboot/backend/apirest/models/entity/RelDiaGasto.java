@@ -29,8 +29,8 @@ public class RelDiaGasto implements Serializable{
 	@Column(name = "id_cantidad")
 	private Long id;
 	
-	
-	
+	@Column(nullable = false)
+	private boolean ingreso;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "fk_id_dia")
@@ -75,9 +75,14 @@ public class RelDiaGasto implements Serializable{
 	public void setCantidad(BigDecimal cantidad) {
 		this.cantidad = cantidad;
 	}
-	
-	
-	
+
+	public boolean isIngreso() {
+		return ingreso;
+	}
+
+	public void setIngreso(boolean ingreso) {
+		this.ingreso = ingreso;
+	}
 	
 	
 }

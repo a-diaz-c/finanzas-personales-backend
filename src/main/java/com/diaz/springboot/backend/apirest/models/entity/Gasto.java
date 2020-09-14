@@ -33,6 +33,7 @@ public class Gasto implements Serializable {
 	@Column(name = "id_gasto")
 	private Long idGasto;
 	
+	@Column(nullable = false)
 	private String nombre;
 	
 	@ManyToOne(fetch = FetchType.LAZY)

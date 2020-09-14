@@ -1,8 +1,11 @@
 package com.diaz.springboot.backend.apirest.controllers;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +68,7 @@ public class DiaRestController {
 			}
 			
 			dias = diaService.findByUsuario(usuario);
-			
+			Collections.sort(dias, (x,y)-> y.getFecha().compareTo(x.getFecha()));
 		} catch (DataAccessException e) {
 			response.put("respuesta", false);
 			response.put("mensaje", "Error al realizar la consulta en la base de datos");
@@ -79,6 +82,7 @@ public class DiaRestController {
 				
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
+
 	
 	@GetMapping("dias/cantidad/{idDia}")
 	public ResponseEntity<?> cantidad(@PathVariable (value = "idDia") Long idDia){
@@ -94,7 +98,10 @@ public class DiaRestController {
 				response.put("mensaje", "El dia ID: ".concat(idDia.toString().concat(" no existe en la base de datos")));
 				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 			}
+			
 			cantidades = diaService.findCantidades(dia);
+			
+			
 		} catch (DataAccessException e) {
 			response.put("respuesta", false);
 			response.put("mensaje", "Error al realizar la consulta en la base de datos");
@@ -105,8 +112,38 @@ public class DiaRestController {
 		response.put("respuesta",true);
 		response.put("mensaje", "Dias consultados");
 		response.put("cantidades", cantidades);
+		response.put("dia", dia);
 		
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+	}
+	
+	@PostMapping("/dias/{idDia}/movimiento")
+	public ResponseEntity<?> addDia(Authentication authentication, @RequestBody RelDiaGasto moviento, 
+									BindingResult result, @PathVariable (value = "idDia") Long idDia){
+		
+		Map<String, Object> response = new HashMap<>();
+		Dia dia = null;
+		
+		try {
+			dia = diaService.findById(idDia);
+			if(dia == null) {
+				response.put("respuesta", false);
+				response.put("mensaje", "El dia ID: ".concat(idDia.toString().concat(" no existe en la base de datos")));
+				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+			}
+			moviento.setDia(dia);
+			RelDiaGasto movientoNuevo = diaService.saveCantidad(moviento);
+			response.put("mensaje", "El movimiento se ha agregado al dia con éxito!");
+			response.put("Día", movientoNuevo);
+			
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
+			
+		} catch (DataAccessException e) {
+			response.put("mensaje", "Error al realizar el insert en la base de datos");
+			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 	}
 
 	
@@ -121,9 +158,7 @@ public class DiaRestController {
 		Map<String, Object> response = new HashMap<>();
 		
 		log.info("La fecha recibida: " + dia.getFecha());
-		
-		//dia.setFecha(modifiarFecha(dia.getFecha(), 1));
-		
+				
 		if(result.hasErrors()) {
 			List<String> errors = result.getFieldErrors()
 					.stream()
@@ -134,23 +169,37 @@ public class DiaRestController {
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
 		}
 		
-		try {
+		try {			
 			usuario = usuarioService.buscasEmail(authentication.getName());
+			//dia.setFecha(modifiarFecha(dia.getFecha(), 1));
+			
+			if(diaService.findByFecha(dia.getFecha(), usuario) != null) {
+				response.put("respuesta", false);
+				response.put("mensaje", "El la fecha ya esta guardada");
+				return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+			}
+			
 			dia.setUsuario(usuario);
 			nuevoDia = diaService.save(dia);
 			
-			BigDecimal gastoDia = new BigDecimal("0.0");
+			BigDecimal gastoDelDia = new BigDecimal("0.0");
 			BigDecimal saldoFinal;
 			
 			for(RelDiaGasto cantidad: cantidades) {
 				cantidad.setDia(nuevoDia);
-				gastoDia = gastoDia.add(cantidad.getCantidad());
+				if(cantidad.isIngreso())
+					gastoDelDia = gastoDelDia.add(cantidad.getCantidad());
+				else
+					gastoDelDia = gastoDelDia.subtract(cantidad.getCantidad());
+				
 				diaService.saveCantidad(cantidad);
 			}
+			log.info("total gasto: " + gastoDelDia);
+			saldoFinal = dia.getSaldoInicial().add(gastoDelDia);
 			
-			saldoFinal = dia.getSaldoInicial().subtract(gastoDia);
 	
 			dia.setSaldoFinal(saldoFinal);
+			usuario.setSaldo(usuario.getSaldo().add(saldoFinal));
 			nuevoDia = diaService.save(dia);			
 			
 		} catch (DataAccessException e) {
@@ -158,13 +207,14 @@ public class DiaRestController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		nuevoDia.setFecha(modifiarFecha(nuevoDia.getFecha(), -1));
+		//nuevoDia.setFecha(modifiarFecha(nuevoDia.getFecha(), -1));
 		response.put("mensaje", "El dia se ha agregado con éxito!");
 		response.put("Día", nuevoDia);
 		
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);	
 		
 	}
+
 	
 	@PutMapping("/dias/{idDia}")
 	public ResponseEntity<?> update(@RequestBody Dia dia, Authentication authentication,
@@ -302,4 +352,33 @@ public class DiaRestController {
 		
 		return calendar.getTime();
 	}
+	
+	@GetMapping("dias/saldoInicial/{fecha}")
+	private ResponseEntity<?> diaAnterrior(@PathVariable (value = "fecha") String fecha, Authentication authentication) {
+		Map<String, Object> response = new HashMap<>();
+		Date date = null;
+		try {
+			Usuario usuario = usuarioService.buscasEmail(authentication.getName());
+			date = new SimpleDateFormat("yyyy-MM-dd").parse(fecha);
+		
+			
+			date = modifiarFecha(date, -1);
+			Dia diaAnterio = diaService.findByFecha(date, usuario);
+			if(diaAnterio != null) {
+				response.put("respuesta", true);
+				response.put("mensaje", "Dia anterior encontrado");
+				response.put("usuario", diaAnterio);
+			}else {
+				response.put("repuesta", false);
+				response.put("mensaje", "No hay dia anterior");
+			}
+			
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+		} catch (ParseException e) {
+			response.put("error", e.getMessage().concat(" ").concat(e.getCause().toString()));
+			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
+	}
+	
 }

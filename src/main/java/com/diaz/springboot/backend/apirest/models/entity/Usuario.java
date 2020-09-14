@@ -1,6 +1,7 @@
 package com.diaz.springboot.backend.apirest.models.entity;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,9 +46,9 @@ public class Usuario implements Serializable{
 	@Column(nullable = false)
 	private String apellido;
 	@Column(nullable = false, unique = true)
-	private String usuario;
-	@Column(nullable = false, unique = true)
 	private String email;
+	@Column(columnDefinition =  "Decimal(10,2) default '0.00'")
+	private BigDecimal saldo;
 	@JsonProperty(access = Access.WRITE_ONLY)
 	@Column(nullable = false)
 	private String password;
@@ -57,13 +58,13 @@ public class Usuario implements Serializable{
 	private Date createAt;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private List<Categoria> categoria;
+	private List<Categoria> categorias;
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	private List<Dia> dias;
 	
 	public Usuario() {
-		this.categoria = new ArrayList<Categoria>();
+		this.categorias = new ArrayList<Categoria>();
 		this.dias = new ArrayList<Dia>();
 	}
 	
@@ -96,14 +97,6 @@ public class Usuario implements Serializable{
 		this.apellido = apellido;
 	}
 
-	public String getUsuario() {
-		return usuario;
-	}
-
-	public void setUsuario(String usuario) {
-		this.usuario = usuario;
-	}
-
 	public String getEmail() {
 		return email;
 	}
@@ -129,15 +122,15 @@ public class Usuario implements Serializable{
 	}
 
 	public List<Categoria> getCategorias() {
-		return categoria;
+		return categorias;
 	}
 
 	public void setCategoria(List<Categoria> categoria) {
-		this.categoria = categoria;
+		this.categorias = categoria;
 	}
 	
 	public void addCategoria(Categoria categoria) {
-		this.categoria.add(categoria);
+		this.categorias.add(categoria);
 	}
 
 	public List<Dia> getDias() {
@@ -150,6 +143,14 @@ public class Usuario implements Serializable{
 	
 	public void addDias(Dia dia) {
 		this.dias.add(dia);
+	}
+
+	public BigDecimal getSaldo() {
+		return saldo;
+	}
+
+	public void setSaldo(BigDecimal saldo) {
+		this.saldo = saldo;
 	}
 
 }
