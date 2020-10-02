@@ -75,6 +75,7 @@ public class UsuarioRestController {
 		Usuario usuario = null;
 		Map<String, Object> response = new HashMap<>();
 		
+		
 		try {
 			usuario = usuarioService.buscasEmail(authentication.getName());	
 		}catch (DataAccessException e) {
@@ -92,6 +93,7 @@ public class UsuarioRestController {
 		
 		response.put("respuesta", true);
 		response.put("usuario", usuario);
+		log.info("El saldo es " + usuario.getSaldo());
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
 		
@@ -100,6 +102,7 @@ public class UsuarioRestController {
 		
 		Usuario usuarioNuevo = null;
 		Map<String, Object> response = new HashMap<>();
+		
 		
 		if(result.hasErrors()) {
 			List<String> errors = result.getFieldErrors()
@@ -124,6 +127,7 @@ public class UsuarioRestController {
 			
 			String passwordBcryp =  passwordEncoder.encode(usuario.getPassword());
 			usuario.setPassword(passwordBcryp);
+			usuario.setSaldo(new java.math.BigDecimal("0.00"));
 			usuarioNuevo = usuarioService.save(usuario);
 		}catch (DataAccessException e) {
 			response.put("respuesta", false);
